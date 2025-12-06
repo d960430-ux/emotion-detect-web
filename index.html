@@ -479,7 +479,8 @@
           <div class="control-group">
             <label for="apiKey">Google Vision API Key</label>
             <input id="apiKey" type="password" value="AIzaSyAXZZRFIcMPoT4k0S8EzcW3CPop5woR3bU" placeholder="貼上您的 API Key">
-            <p class="hint">✅ API Key 已設定完成，可直接使用真實情緒偵測功能。</p>
+            <p class="hint">✅ API Key 已設定完成，可直接使用真實情緒偵測功能。<br>
+            💡 提示：請確保臉部清晰、光線充足、距離適中（30-100cm），並保持正面或微側面角度以獲得最佳偵測效果。</p>
           </div>
         </div>
         
@@ -937,8 +938,11 @@ async function detectEmotion() {
   
   try {
     const result = await analyzeEmotion(imageData);
-    displayEmotionResult(result);
-    updateTrendChart(result.topEmotion);
+    
+    if (result) {
+      displayEmotionResult(result);
+      updateTrendChart(result.topEmotion);
+    }
   } catch (error) {
     // 如果是取消請求，不顯示錯誤
     if (error.name === 'AbortError') {
@@ -949,13 +953,42 @@ async function detectEmotion() {
     
     // 根據錯誤類型顯示不同訊息
     let errorMsg = '偵測錯誤';
+    
     if (error.message.includes('未偵測到臉部')) {
-      errorMsg = '未偵測到臉部，請確保臉部清晰可見';
+      // 臉部偵測失敗 - 給予提示但不停止
+      errorMsg = '⚠️ 未偵測到臉部，請調整角度或光線';
       setStatus(errorMsg, 'warning');
+      
+      // 顯示提示訊息在情緒區域
+      elements.emotionDisplay.innerHTML = `
+        <div class="empty-state" style="padding: 20px;">
+          <p style="font-size: 24px; margin-bottom: 10px;">🤔</p>
+          <p style="color: var(--warning); font-weight: 600;">未偵測到臉部</p>
+          <p style="font-size: 13px; margin-top: 8px; color: var(--text-muted);">
+            請確保：<br>
+            • 臉部清晰完整出現在畫面中<br>
+            • 光線充足<br>
+            • 距離適中（約 30-100 公分）<br>
+            • 正面或微側面角度
+          </p>
+        </div>
+      `;
+      
     } else if (error.message.includes('API Key')) {
-      errorMsg = 'API Key 錯誤，請檢查設定';
+      errorMsg = '❌ API Key 錯誤，請檢查設定';
       setStatus(errorMsg, 'error');
       handleStop(); // API Key 錯誤時停止偵測
+      
+    } else if (error.message.includes('quota')) {
+      errorMsg = '❌ API 配額已用完，請檢查 Google Cloud 設定';
+      setStatus(errorMsg, 'error');
+      handleStop();
+      
+    } else if (error.message.includes('PERMISSION_DENIED')) {
+      errorMsg = '❌ API Key 權限不足，請檢查 API 設定';
+      setStatus(errorMsg, 'error');
+      handleStop();
+      
     } else {
       errorMsg = `偵測錯誤: ${error.message}`;
       setStatus(errorMsg, 'error');
@@ -977,6 +1010,7 @@ function captureFrame() {
   let width = video.videoWidth;
   let height = video.videoHeight;
   
+  // 調整影像大小以節省流量
   if (width > CONFIG.MAX_IMAGE_WIDTH) {
     height = Math.round(height * (CONFIG.MAX_IMAGE_WIDTH / width));
     width = CONFIG.MAX_IMAGE_WIDTH;
@@ -989,17 +1023,24 @@ function captureFrame() {
   
   // 如果影片被鏡像，需要翻轉回正常方向給 API
   const isMirrored = elements.video.style.transform.includes('scaleX(-1)');
+  
+  ctx.save();
+  
   if (isMirrored) {
-    ctx.save();
+    // 鏡像翻轉
     ctx.scale(-1, 1);
     ctx.drawImage(video, -width, 0, width, height);
-    ctx.restore();
   } else {
     ctx.drawImage(video, 0, 0, width, height);
   }
   
+  ctx.restore();
+  
   try {
-    return canvas.toDataURL('image/jpeg', 0.7);
+    // 使用較高的品質以提升偵測準確度
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    console.log('已擷取影像，大小:', Math.round(dataUrl.length / 1024), 'KB');
+    return dataUrl;
   } catch (error) {
     console.error('擷取影像失敗:', error);
     return null;
@@ -1055,59 +1096,85 @@ async function callVisionAPI(imageData) {
   const requestBody = {
     requests: [{
       image: { content: base64 },
-      features: [{ type: 'FACE_DETECTION', maxResults: 1 }]
+      features: [{ 
+        type: "FACE_DETECTION", 
+        maxResults: 10  // 增加偵測數量
+      }],
+      imageContext: {
+        faceDetectionParams: {
+          includeLandmarks: false
+        }
+      }
     }]
   };
   
   state.abortController = new AbortController();
   
-  const response = await fetch(
-    `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      signal: state.abortController.signal
+  try {
+    const response = await fetch(
+      `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: state.abortController.signal
+      }
+    );
+    
+    state.abortController = null;
+    
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('API 錯誤回應:', error);
+      throw new Error(error.error?.message || `API 錯誤: ${response.status}`);
     }
-  );
-  
-  state.abortController = null;
-  
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || `API 錯誤: ${response.status}`);
-  }
-  
-  const data = await response.json();
-  const face = data.responses[0]?.faceAnnotations?.[0];
-  
-  if (!face) {
-    throw new Error('未偵測到臉部');
-  }
-  
-  const emotions = {
-    Joy: face.joyLikelihood || 'UNKNOWN',
-    Anger: face.angerLikelihood || 'UNKNOWN',
-    Sorrow: face.sorrowLikelihood || 'UNKNOWN',
-    Surprise: face.surpriseLikelihood || 'UNKNOWN'
-  };
-  
-  let topEmotion = 'Joy';
-  let maxValue = 0;
-  
-  for (const [emotion, likelihood] of Object.entries(emotions)) {
-    const value = LIKELIHOOD_VALUES[likelihood] || 0;
-    if (value > maxValue) {
-      maxValue = value;
-      topEmotion = emotion;
+    
+    const data = await response.json();
+    console.log('API 回應:', data);
+    
+    // 檢查是否有錯誤
+    if (data.responses[0]?.error) {
+      throw new Error(data.responses[0].error.message);
     }
+    
+    const face = data.responses[0]?.faceAnnotations?.[0];
+    
+    if (!face) {
+      console.warn('API 回應中沒有臉部資料');
+      throw new Error('未偵測到臉部');
+    }
+    
+    console.log('偵測到的臉部資料:', face);
+    
+    const emotions = {
+      Joy: face.joyLikelihood || 'UNKNOWN',
+      Anger: face.angerLikelihood || 'UNKNOWN',
+      Sorrow: face.sorrowLikelihood || 'UNKNOWN',
+      Surprise: face.surpriseLikelihood || 'UNKNOWN'
+    };
+    
+    console.log('情緒資料:', emotions);
+    
+    let topEmotion = 'Joy';
+    let maxValue = 0;
+    
+    for (const [emotion, likelihood] of Object.entries(emotions)) {
+      const value = LIKELIHOOD_VALUES[likelihood] || 0;
+      if (value > maxValue) {
+        maxValue = value;
+        topEmotion = emotion;
+      }
+    }
+    
+    return {
+      emotions,
+      topEmotion,
+      confidence: Math.round(maxValue * 100)
+    };
+  } catch (error) {
+    state.abortController = null;
+    throw error;
   }
-  
-  return {
-    emotions,
-    topEmotion,
-    confidence: Math.round(maxValue * 100)
-  };
 }
 
 // ==================== UI 更新 ====================
