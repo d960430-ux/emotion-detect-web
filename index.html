@@ -540,9 +540,17 @@
       <div class="card" style="margin-top: 20px;">
         <h2 class="section-title">⚙️ API 設定</h2>
         
-        <div class="demo-mode-notice" style="background: #d1fae5; border-left-color: #10b981;">
-          <strong>✅ API Key 已設定</strong>
-          <p style="font-size: 13px; margin: 0;">您的 API Key 已預先設定完成，現在可以直接使用真實的 Google Vision AI 進行情緒偵測！</p>
+        <div class="demo-mode-notice" style="background: #fee2e2; border-left-color: #ef4444;">
+          <strong>⚠️ 遇到「API 權限不足」錯誤？</strong>
+          <p style="font-size: 13px; margin: 8px 0 0 0;">
+            <strong>最簡單的解決方法：</strong><br>
+            1️⃣ 前往 <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #991b1b; text-decoration: underline;">Google Cloud Console - 憑證</a><br>
+            2️⃣ 建立一個新的 API Key<br>
+            3️⃣ <strong>應用程式限制</strong>選「<strong>無</strong>」<br>
+            4️⃣ <strong>API 限制</strong>選「<strong>不限制金鑰</strong>」<br>
+            5️⃣ 儲存後等 1-2 分鐘，複製新 Key 到下方<br>
+            <a href="#debugPanel" style="color: #991b1b; font-weight: 600;">→ 查看除錯面板了解更多</a>
+          </p>
         </div>
         
         <div class="control-group">
@@ -556,9 +564,102 @@
         <div id="apiKeySection" class="api-settings">
           <div class="control-group">
             <label for="apiKey">Google Vision API Key</label>
-            <input id="apiKey" type="password" value="AIzaSyAXZZRFIcMPoT4k0S8EzcW3CPop5woR3bU" placeholder="貼上您的 API Key">
-            <p class="hint">✅ API Key 已設定完成，可直接使用真實情緒偵測功能。<br>
-            💡 提示：請確保臉部清晰、光線充足、距離適中（30-100cm），並保持正面或微側面角度以獲得最佳偵測效果。</p>
+            <input id="apiKey" type="text" value="AIzaSyAJSMvKRawnJvhbZ7yjEFfwK3rp0OPXfdw" placeholder="貼上您的 API Key">
+            <p class="hint">
+              🔑 目前的 API Key: <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 11px;">AIza...Xfdw</code><br>
+              💡 提示：請確保臉部清晰、光線充足、距離適中（30-100cm）
+            </p>
+          </div>
+          
+          <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 14px; margin-top: 12px;">
+            <strong style="color: #1e40af; display: block; margin-bottom: 10px; font-size: 15px;">📚 完整操作指南（從零開始）</strong>
+            
+            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+              <strong style="color: #1e40af; display: block; margin-bottom: 8px;">步驟 1️⃣：建立或選擇 Google Cloud 專案</strong>
+              <ol style="font-size: 13px; color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>前往 <a href="https://console.cloud.google.com/" target="_blank" style="color: #2563eb; text-decoration: underline; font-weight: 600;">Google Cloud Console</a></li>
+                <li>在頂部導覽列，點擊專案下拉選單</li>
+                <li>如果沒有專案：點擊「<strong>新增專案</strong>」
+                  <ul style="margin-top: 4px; font-size: 12px;">
+                    <li>輸入專案名稱（例如：emotion-detector）</li>
+                    <li>點擊「建立」</li>
+                    <li>等待專案建立完成（約 10-30 秒）</li>
+                  </ul>
+                </li>
+                <li>如果已有專案：選擇要使用的專案</li>
+              </ol>
+            </div>
+            
+            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+              <strong style="color: #1e40af; display: block; margin-bottom: 8px;">步驟 2️⃣：啟用 Cloud Vision API</strong>
+              <ol style="font-size: 13px; color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>點擊這個連結：<a href="https://console.cloud.google.com/apis/library/vision.googleapis.com" target="_blank" style="color: #2563eb; text-decoration: underline; font-weight: 600;">Cloud Vision API</a></li>
+                <li>確認頂部顯示的是正確的專案名稱</li>
+                <li>點擊藍色的「<strong>啟用</strong>」按鈕</li>
+                <li>等待啟用完成（約 5-10 秒）</li>
+                <li>成功後會顯示「<strong>API 已啟用</strong>」</li>
+              </ol>
+            </div>
+            
+            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+              <strong style="color: #1e40af; display: block; margin-bottom: 8px;">步驟 3️⃣：建立 API 金鑰</strong>
+              <ol style="font-size: 13px; color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>點擊左側選單「<strong>憑證</strong>」（或直接點 <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #2563eb; text-decoration: underline; font-weight: 600;">這裡</a>）</li>
+                <li>點擊頂部「<strong>+ 建立憑證</strong>」按鈕</li>
+                <li>選擇「<strong>API 金鑰</strong>」</li>
+                <li>會彈出視窗顯示新建立的 API Key，<strong>先複製並儲存它</strong></li>
+                <li>點擊「<strong>編輯 API 金鑰</strong>」或「<strong>限制金鑰</strong>」</li>
+              </ol>
+            </div>
+            
+            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+              <strong style="color: #1e40af; display: block; margin-bottom: 8px;">步驟 4️⃣：設定 API 金鑰限制</strong>
+              <ol style="font-size: 13px; color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>在「<strong>應用程式限制</strong>」區域：
+                  <ul style="margin-top: 4px; font-size: 12px;">
+                    <li>選擇「<strong>無</strong>」（測試時最簡單）</li>
+                    <li>或選擇「<strong>HTTP referrer (網站)</strong>」然後輸入 <code>*</code></li>
+                  </ul>
+                </li>
+                <li>在「<strong>API 限制</strong>」區域：
+                  <ul style="margin-top: 4px; font-size: 12px;">
+                    <li><strong>建議：</strong>先選擇「<strong>不限制金鑰</strong>」（測試用）</li>
+                    <li><strong>或：</strong>選擇「<strong>限制金鑰</strong>」→ 在下拉選單搜尋並勾選「Cloud Vision API」</li>
+                  </ul>
+                </li>
+                <li>點擊底部「<strong>儲存</strong>」按鈕</li>
+                <li><strong>重要：</strong>等待 1-2 分鐘讓設定生效</li>
+              </ol>
+            </div>
+            
+            <div style="background: white; padding: 12px; border-radius: 6px;">
+              <strong style="color: #1e40af; display: block; margin-bottom: 8px;">步驟 5️⃣：使用 API Key</strong>
+              <ol style="font-size: 13px; color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>複製你的 API Key</li>
+                <li>貼到上方的「Google Vision API Key」輸入框</li>
+                <li>點擊「開始偵測」測試</li>
+                <li>如果遇到錯誤，勾選「顯示詳細除錯資訊」查看問題</li>
+              </ol>
+            </div>
+            
+            <div style="background: #fef3c7; padding: 10px; border-radius: 6px; margin-top: 12px; border-left: 3px solid #f59e0b;">
+              <strong style="color: #92400e; font-size: 13px;">⚠️ 常見問題：</strong>
+              <ul style="font-size: 12px; color: #78350f; margin: 6px 0 0 0; padding-left: 20px; line-height: 1.6;">
+                <li><strong>找不到專案？</strong> 確認已登入正確的 Google 帳號</li>
+                <li><strong>無法啟用 API？</strong> 可能需要啟用計費（但有免費額度 1,000 次/月）</li>
+                <li><strong>權限不足？</strong> 確認你是專案的擁有者或編輯者</li>
+                <li><strong>還是失敗？</strong> 嘗試建立全新的專案和 API Key</li>
+              </ul>
+            </div>
+            
+            <div style="background: #d1fae5; padding: 10px; border-radius: 6px; margin-top: 10px; border-left: 3px solid #10b981;">
+              <strong style="color: #065f46; font-size: 13px;">✅ 免費額度說明：</strong>
+              <p style="font-size: 12px; color: #047857; margin: 6px 0 0 0; line-height: 1.6;">
+                Cloud Vision API 提供每月 <strong>1,000 次免費呼叫</strong>。<br>
+                以本程式 2 FPS 計算，可連續使用約 <strong>8 分鐘</strong>。<br>
+                超過免費額度後才會計費，可以在 Google Cloud Console 設定預算警示。
+              </p>
+            </div>
           </div>
         </div>
         
@@ -586,11 +687,12 @@
         <div class="troubleshoot-card">
           <h3>🛠️ 疑難排解指南</h3>
           <ul class="troubleshoot-list">
+            <li><strong>權限不足錯誤？</strong> API Key 限制設定不正確，請設定為「無限制」或允許所有 referrer</li>
             <li><strong>未偵測到臉部？</strong> 確保臉部完整出現在畫面中央，距離 30-100 公分</li>
             <li><strong>光線問題？</strong> 需要充足且均勻的光線，避免逆光或陰影</li>
-            <li><strong>API 錯誤？</strong> 檢查 API Key 是否正確，Vision API 是否已啟用</li>
-            <li><strong>配額用完？</strong> 前往 Google Cloud Console 檢查使用量</li>
+            <li><strong>配額用完？</strong> 免費額度 1,000 次/月，前往 Google Cloud Console 檢查使用量</li>
             <li><strong>相機無法啟動？</strong> 確認瀏覽器權限，在 HTTPS 環境下使用</li>
+            <li><strong>API 未啟用？</strong> 前往 Google Cloud Console 啟用 Cloud Vision API</li>
           </ul>
         </div>
       </div>
@@ -1169,33 +1271,51 @@ async function detectEmotion() {
     } else if (error.message.includes('權限') || error.message.includes('PERMISSION_DENIED')) {
       errorMsg = '❌ API Key 權限不足';
       troubleshootTips = [
-        '請前往 Google Cloud Console',
-        '確認 Vision API 已啟用',
-        '檢查 API Key 的權限設定',
-        '確認 API Key 沒有 IP 或 HTTP referrer 限制'
+        '<strong>最快的解決方法：</strong>',
+        '1. 前往 <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console - 憑證</a>',
+        '2. 點擊「<strong>建立憑證</strong>」→「<strong>API 金鑰</strong>」',
+        '3. 在彈出視窗中，點擊「<strong>編輯 API 金鑰</strong>」或「<strong>限制金鑰</strong>」',
+        '4. <strong>應用程式限制</strong>：選擇「<strong>無</strong>」',
+        '5. <strong>API 限制</strong>：選擇「<strong>不限制金鑰</strong>」（最簡單）',
+        '6. 點擊「儲存」並等待 1-2 分鐘',
+        '7. 複製新的 API Key 並貼到上方輸入框',
+        '',
+        '<strong>如果 Vision API 未啟用：</strong>',
+        '• 前往 <a href="https://console.cloud.google.com/apis/library/vision.googleapis.com" target="_blank">Vision API 頁面</a>',
+        '• 點擊「啟用」按鈕',
+        '',
+        '<strong>除錯技巧：</strong>',
+        '• 在 Google Cloud Console 查看「API 和服務」→「已啟用的 API 和服務」',
+        '• 確認列表中有 "Cloud Vision API" 或類似名稱',
+        '• 嘗試用「不限制金鑰」測試，確認可用後再設定限制'
       ];
-      setStatus(errorMsg, 'error');
-      handleStop();
+      setStatus(errorMsg + ' - 不會自動停止，請修正後繼續', 'error');
+      // 不要自動停止，讓使用者可以修正設定後繼續
+      // handleStop();
       
     } else if (error.message.includes('配額') || error.message.includes('RESOURCE_EXHAUSTED')) {
       errorMsg = '❌ API 配額已用完';
       troubleshootTips = [
-        '前往 Google Cloud Console 檢查配額',
-        '等待配額重置（通常是每日重置）',
-        '考慮升級配額或啟用計費'
+        '前往 <a href="https://console.cloud.google.com/apis/api/vision.googleapis.com/quotas" target="_blank">Google Cloud Console - 配額頁面</a>',
+        '查看每日免費配額是否已用完（免費額度：1,000 次/月）',
+        '等待配額重置（通常是每月 1 日重置）',
+        '考慮啟用計費帳戶以獲得更多配額'
       ];
-      setStatus(errorMsg, 'error');
-      handleStop();
+      setStatus(errorMsg + ' - 不會自動停止', 'error');
+      // 不要自動停止
+      // handleStop();
       
     } else if (error.message.includes('API Key')) {
       errorMsg = '❌ API Key 錯誤';
       troubleshootTips = [
-        '檢查 API Key 是否正確複製',
-        '確認沒有多餘的空格',
-        '確認 API Key 尚未過期或被刪除'
+        '檢查 API Key 是否正確複製（不要有多餘空格）',
+        '確認 API Key 尚未過期或被刪除',
+        '嘗試重新產生一個新的 API Key',
+        '確認使用的是「API 金鑰」而非「OAuth 2.0 用戶端 ID」'
       ];
-      setStatus(errorMsg, 'error');
-      handleStop();
+      setStatus(errorMsg + ' - 不會自動停止，請修正 API Key', 'error');
+      // 不要自動停止
+      // handleStop();
       
     } else {
       errorMsg = `❌ ${error.message}`;
